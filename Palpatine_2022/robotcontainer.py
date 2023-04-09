@@ -2,6 +2,7 @@ import commands2
 import ctre
 import wpilib
 from wpilib import XboxController
+from wpilib.interfaces import GenericHID
 
 import constants
 from commands.drive_by_joystick import DriveByJoystick
@@ -13,7 +14,9 @@ from subsystems.drivetrain import Drivetrain
 class RobotContainer:
     def __init__(self) -> None:
         # driver controller
-        self.driverController = XboxController(constants.kdriverControllerPort)
+        #self.driverController = XboxController(constants.kdriverControllerPort)
+
+        self.driverController = GenericHID(constants.kdriverControllerPort)
 
         self.frontLeft = ctre.TalonFX(constants.kfrontLeft)
         self.backLeft = ctre.TalonFX(constants.kbackLeft)
