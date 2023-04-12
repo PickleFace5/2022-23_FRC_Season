@@ -37,9 +37,9 @@ class RobotContainer:
         # ARCADE, OBJECTIVELY WAY BETTER - Pickle_Face5 & Wyatt
         self.drive.setDefaultCommand(DriveByGuitar(self.drive, lambda: self.forwardSum(), lambda: self.reverseSum(), lambda: self.driverController.getGreenButton()))
 
-    def forwardSum(
-            self) -> float:  # It took more than 2 and a half hours to get this to work, I swear if this stops working I'm going to commit a crime
-        leftY, rightX = self.addDeadZone(self.driverController.getJoystickY(), self.driverController.getSliderValue())
+    def forwardSum(self) -> float:  # It took more than 2 and a half hours to get this to work, I swear if this stops working I'm going to commit a crime
+        leftY = self.driverController.getJoystickY()
+        rightX = self.driverController.getSliderValue()
         finalValue = -leftY + rightX
         if (finalValue > 1):
             finalValue = 1
@@ -48,27 +48,14 @@ class RobotContainer:
         return finalValue
 
     def reverseSum(self) -> float:
-        leftY, rightX = self.addDeadZone(self.driverController.getJoystickY(), self.driverController.getSliderValue())
+        leftY = self.driverController.getJoystickY()
+        rightX = self.driverController.getSliderValue()
         finalValue = -leftY - rightX
         if (finalValue > 1):
             finalValue = 1
         elif (finalValue < -1):
             finalValue = -1
         return finalValue
-
-    def addDeadZone(self, leftYParam: float, rightXParam: float) -> tuple:
-        leftY = leftYParam
-        rightX = rightXParam
-        print(leftY)
-        #wpilib.SmartDashboard.putNumber('trueLeftJoy - ', leftY)
-        #wpilib.SmartDashboard.putNumber('trueRightJoy - ', rightX)
-
-        # Controller Dead Zone
-        if (abs(leftY) <= constants.controllerDeadZoneLeft):
-            leftY = 0
-        if (abs(rightX) <= constants.controllerDeadZoneRight):
-            rightX = 0
-        return leftY, rightX
 
     def getAutonomousCommand(self) -> commands2.Command:
         return self.chooser.getSelected()
