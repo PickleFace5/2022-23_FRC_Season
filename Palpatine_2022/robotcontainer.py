@@ -1,22 +1,19 @@
 import commands2
 import ctre
 import wpilib
-from wpilib import XboxController
-from wpilib.interfaces import GenericHID
 
 import constants
-from commands.drive_by_joystick import DriveByJoystick
+from commands.drive_by_guitar import DriveByGuitar
 from commands.drive_straight import DriveStraight
 from subsystems.drivetrain import Drivetrain
 
+from guitar import Guitar
+from wpilib.interfaces import GenericHID
+from wpilib import XboxController
 
-# hi
 class RobotContainer:
     def __init__(self) -> None:
-        # driver controller
-        #self.driverController = XboxController(constants.kdriverControllerPort)
-
-        self.driverController = GenericHID(constants.kdriverControllerPort)
+        self.driverController = Guitar(0)
 
         self.frontLeft = ctre.TalonFX(constants.kfrontLeft)
         self.backLeft = ctre.TalonFX(constants.kbackLeft)
@@ -37,22 +34,12 @@ class RobotContainer:
 
         wpilib.SmartDashboard.putData("Autonomous", self.chooser)
 
-        # self.configureButtonBindings()
-
-        # self.drive.setDefaultCommand(DriveByJoystick(self.drive, lambda: -self.driverController.getLeftY(), lambda: -self.driverController.getRightY(), lambda: self.driverController.getRightBumper(), lambda: self.driverController.getLeftBumper()))
-
-        # self.drive.setDefaultCommand(DriveByJoystick(self.drive, lambda: -self.driverController.getLeftY(), lambda: -self.driverController.getRightY()))
-
         # ARCADE, OBJECTIVELY WAY BETTER - Pickle_Face5 & Wyatt
-        self.drive.setDefaultCommand(DriveByJoystick(self.drive,
-                                                     lambda: self.forwardSum(),
-                                                     lambda: self.reverseSum(),
-                                                     lambda: self.driverController.getRightBumper(),
-                                                     lambda: self.driverController.getLeftBumper()))
+        self.drive.setDefaultCommand(DriveByGuitar(self.drive, lambda: self.forwardSum(), lambda: self.reverseSum(), lambda: self.driverController.getGreenButton()))
 
     def forwardSum(
             self) -> float:  # It took more than 2 and a half hours to get this to work, I swear if this stops working I'm going to commit a crime
-        leftY, rightX = self.addDeadZone(self.driverController.getLeftY(), self.driverController.getRightX())
+        leftY, rightX = self.addDeadZone(self.driverController.getJoystickY(), self.driverController.getSliderValue())
         finalValue = -leftY + rightX
         if (finalValue > 1):
             finalValue = 1
@@ -61,7 +48,7 @@ class RobotContainer:
         return finalValue
 
     def reverseSum(self) -> float:
-        leftY, rightX = self.addDeadZone(self.driverController.getLeftY(), self.driverController.getRightX())
+        leftY, rightX = self.addDeadZone(self.driverController.getJoystickY(), self.driverController.getSliderValue())
         finalValue = -leftY - rightX
         if (finalValue > 1):
             finalValue = 1
@@ -72,8 +59,9 @@ class RobotContainer:
     def addDeadZone(self, leftYParam: float, rightXParam: float) -> tuple:
         leftY = leftYParam
         rightX = rightXParam
-        wpilib.SmartDashboard.putNumber('trueLeftJoy - ', leftY)
-        wpilib.SmartDashboard.putNumber('trueRightJoy - ', rightX)
+        print(leftY)
+        #wpilib.SmartDashboard.putNumber('trueLeftJoy - ', leftY)
+        #wpilib.SmartDashboard.putNumber('trueRightJoy - ', rightX)
 
         # Controller Dead Zone
         if (abs(leftY) <= constants.controllerDeadZoneLeft):
@@ -81,8 +69,6 @@ class RobotContainer:
         if (abs(rightX) <= constants.controllerDeadZoneRight):
             rightX = 0
         return leftY, rightX
-
-    # def configureButtonBindings(self):
 
     def getAutonomousCommand(self) -> commands2.Command:
         return self.chooser.getSelected()
