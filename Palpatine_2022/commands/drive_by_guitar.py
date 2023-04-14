@@ -3,38 +3,35 @@ import typing
 import commands2
 import wpilib
 from subsystems.drivetrain import Drivetrain
+from guitar import Guitar
 
 class DriveByGuitar(commands2.CommandBase):
     """
     This allows us to drive the robot with a Wii Guitar Controller. Yep. This is what we're doing right now.
     """
 
-    def __init__(self, drive: Drivetrain, left_axis: typing.Callable[[], float], right_axis: typing.Callable[[], float], test_button: typing.Callable[[], bool]) -> None:
-        # def __init__(self, drive: Drivetrain, left_axis, right_axis) -> None:
+    def __init__(self, drive: Drivetrain, guitar: Guitar) -> None:
         super().__init__()
 
         self.drive = drive
-        self.left_axis = left_axis
-        self.right_axis = right_axis
-        self.test_button = test_button
+        
+        self.guitar = guitar
 
         self.addRequirements([self.drive])
 
-        
-
-
     def execute(self) -> None:
-        self.drive.userDrive(self.left_axis(), self.right_axis(), 1)
+        # Inputs currently reversed, slider goes forward/backward, while joystick Y controls turning. WIll probably fix later.
+        self.drive.userDrive(forwardSum(self.guitar.getJoystickY(), self.guitar.getSliderValue()), reverseSum(self.guitar.getJoystickY(), self.guitar.getSliderValue()), 0.5)
 
-        wpilib.SmartDashboard.putNumber('Joystick - ', self.left_axis())
-        wpilib.SmartDashboard.putNumber('Slider - ', self.right_axis())
+        wpilib.SmartDashboard.putNumberArray('Joystick - ', [self.guitar.getJoystickX(), self.guitar.getJoystickY()])
+        wpilib.SmartDashboard.putBooleanArray("Fret Buttons: ", [self.guitar.getGreenButton(), self.guitar.getRedButton(), self.guitar.getYellowButton(), self.guitar.getBlueButton(), self.guitar.getOrangeButton()])
+        wpilib.SmartDashboard.putBooleanArray("Strum Bar (U, D):", [self.guitar.getStrumBarUp(), self.guitar.getStrumBarDown()])
+        wpilib.SmartDashboard.putNumber('Slider - ', self.guitar.getSliderValue())
+        wpilib.SmartDashboard.putNumber("Whammy Bar - ", self.guitar.getWhammyBarRot())
         wpilib.SmartDashboard.putNumber("Left Velocity - ", self.drive.frontLeft.getSelectedSensorVelocity())
         wpilib.SmartDashboard.putNumber("Right Velocity - ", self.drive.frontRight.getSelectedSensorVelocity())
-        wpilib.SmartDashboard.putNumberArray("LR", [self.left_axis(), self.right_axis()])
-        wpilib.SmartDashboard.putBoolean("Test Button - ", self.test_button())
 
     def end(self, interrupted: bool) -> None:
-        #
         # Called once after isFinished returns True
         # Stop the drivetrain from moving any further
         self.drive.stopMotors()
@@ -42,3 +39,19 @@ class DriveByGuitar(commands2.CommandBase):
     def isFinished(self) -> bool:
         # Make this return True when this command no longer needs to run execute()
         return False
+    
+def forwardSum(x, y) -> float:
+        finalValue = -y + x
+        if (finalValue > 1):
+            finalValue = 1
+        elif (finalValue < -1):
+            finalValue = -1
+        return finalValue
+
+def reverseSum(x, y) -> float:
+    finalValue = -y - x
+    if (finalValue > 1):
+        finalValue = 1
+    elif (finalValue < -1):
+        finalValue = -1
+    return finalValue

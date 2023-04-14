@@ -8,14 +8,14 @@ class Guitar(GenericHID):
     This class handles guitar input that comes from the Driver Station. Each time a value is requested the most recent value is returned. There is a single class instance for each controller and the mapping of ports to hardware buttons depends on the code in the Driver Station.
     """
 
-    def __init__(self, port: int):
+    def __init__(self, port: int) -> None:
         super().__init__(port)
 
     def getButton(self, id) -> bool:
         """
         Returns a button with the given id. 
         
-        This is mainly used as a helper function for the othe button methods, but can be used for any externally added buttons.
+        This is mainly used as a helper function for the other button methods, but can be used for any externally added buttons.
         """
         return super().getRawButton(id)
     

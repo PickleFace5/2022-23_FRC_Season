@@ -18,8 +18,15 @@
     "SmartDashboard": {
       "open": true
     },
+    "precision": 10,
     "transitory": {
+      "Shuffleboard": {
+        "open": true
+      },
       "SmartDashboard": {
+        "Strum Bar (U": {
+          "open": true
+        },
         "open": true
       }
     }
